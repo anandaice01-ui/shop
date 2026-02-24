@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      body {
+        background: #f5f5f5;
+        padding: 2rem 0;
+      }
+      .admin-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .admin-container h1 {
+        text-align: center;
+        margin-bottom: 1rem;
+        color: #333;
+        font-weight: 700;
+      }
+      .logout-btn {
+        display: block;
+        text-align: right;
+        margin-bottom: 1.5rem;
+      }
+      .logout-btn a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        margin-left: 1rem;
+      }
+      .logout-btn a:hover {
+        color: #764ba2;
+      }
+      .form-section {
+        background: #f9f9f9;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        border-left: 4px solid #667eea;
+      }
+      .form-section h2 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: #333;
+      }
+      .form-group {
+        margin-bottom: 1rem;
+      }
+      .form-group label {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 0.5rem;
+      }
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 0.95rem;
+      }
+      .form-group input:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+      }
+      .btn-add {
+        width: 100%;
+        padding: 0.75rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .btn-add:hover {
+        background: #764ba2;
+      }
+      .products-section {
+        margin-top: 2rem;
+      }
+      .products-section h2 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: #333;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+      }
+      .products-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .products-table thead {
+        background: #f0f0f0;
+      }
+      .products-table th {
+        padding: 0.75rem;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #ddd;
+      }
+      .products-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #eee;
+      }
+      .products-table img {
+        max-width: 80px;
+        max-height: 80px;
+        border-radius: 5px;
+      }
+      .btn-delete {
+        background: #dc3545;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: background 0.3s;
+      }
+      .btn-delete:hover {
+        background: #c82333;
+      }
+      .empty-message {
+        text-align: center;
+        color: #999;
+        padding: 2rem;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-container">
+      <h1>🛍️ Admin Dashboard</h1>
+      <div class="logout-btn">
+        <a href="{{ url_for('index') }}">🏠 Home</a> | 
+        <a href="{{ url_for('logout') }}">Logout</a>
+      </div>
+
+      <!-- Add Product Form -->
+      <div class="form-section">
+        <h2>➕ Add New Product</h2>
+        <form action="{{ url_for('add_product') }}" method="post" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="name">Product Name</label>
+            <input type="text" id="name" name="name" placeholder="e.g. Wireless Headphones" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="price">Price (฿)</label>
+            <input type="text" id="price" name="price" placeholder="e.g. 1290" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="image">Product Image</label>
+            <input type="file" id="image" name="image" accept="image/*" required>
+          </div>
+          
+          <button type="submit" class="btn-add">Add Product</button>
+        </form>
+      </div>
+
+      <!-- Products List -->
+      <div class="products-section">
+        <h2>📦 Products</h2>
+        {% if products %}
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price (฿)</th>
+                <th>Image</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for p in products %}
+              <tr>
+                <td>{{ p.id }}</td>
+                <td>{{ p.name }}</td>
+                <td>{{ '%.2f'|format(p.price) }}</td>
+                <td>
+                  {% if p.image_url %}<img src="{{ p.image_url }}" alt="{{ p.name }}">{% endif %}
+                </td>
+                <td>
+                  <form action="{{ url_for('delete_product', product_id=p.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn-delete" onclick="return confirm('Delete this product?');">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="empty-message">No products yet. Add one to get started!</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

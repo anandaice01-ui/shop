@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cart - MyShop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f5f5f5;
+    }
+    .cart-container {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 1rem;
+    }
+    .cart-header h1 {
+      margin: 0;
+      color: #333;
+    }
+    .back-link {
+      color: #0d6efd;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      background: #fafafa;
+      gap: 1.5rem;
+    }
+    .order-product-image {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .order-info {
+      flex: 1;
+    }
+    .order-info h3 {
+      margin: 0 0 0.5rem 0;
+      color: #333;
+      font-size: 1.1rem;
+    }
+    .order-info p {
+      margin: 0.25rem 0;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .order-price {
+      color: #0d6efd;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 0 1rem;
+      min-width: 100px;
+      text-align: right;
+    }
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .delete-btn:hover {
+      background: #c82333;
+    }
+    .empty-cart {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #999;
+    }
+    .empty-cart p {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .total-section {
+      background: #f0f0f0;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: right;
+      margin-top: 2rem;
+    }
+    .total-section p {
+      margin: 0.5rem 0;
+      font-size: 1.1rem;
+    }
+    .total-section .total-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0d6efd;
+    }
+    .payment-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .payment-cod {
+      background: #d4edda;
+      color: #155724;
+    }
+    .payment-bank {
+      background: #cce5ff;
+      color: #004085;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}" style="font-weight: 700; color: #0d6efd;">🛍️ MyShop</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}#products">Products</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('cart') }}">🛒 Cart</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="cart-container">
+      <div class="cart-header">
+        <h1>🛒 My Cart</h1>
+        <a href="{{ url_for('index') }}" class="back-link">← กลับไปเลือกสินค้า</a>
+      </div>
+
+      {% if orders %}
+        {% for order in orders %}
+          <div class="order-item">
+            <img src="{{ order.product.image_url }}" alt="{{ order.product.name }}" class="order-product-image">
+            <div class="order-info">
+              <h3>{{ order.product.name }}</h3>
+              <p><strong>ชื่อ:</strong> {{ order.customer_name }}</p>
+              <p><strong>เบอร์โทร:</strong> {{ order.phone }}</p>
+              <p><strong>ที่อยู่:</strong> {{ order.address }}</p>
+              <p>
+                <strong>วิธีชำระเงิน:</strong> 
+                {% if order.payment_method == 'cod' %}
+                  <span class="payment-badge payment-cod">เก็บเงินปลายทาง</span>
+                {% else %}
+                  <span class="payment-badge payment-bank">ผ่านธนาคาร</span>
+                {% endif %}
+              </p>
+              <p style="color: #999; font-size: 0.8rem;">{{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+            </div>
+            <div class="order-price">฿{{ '%.2f'|format(order.product.price) }}</div>
+            <form action="{{ url_for('delete_order', order_id=order.id) }}" method="post" style="display: inline;">
+              <button type="submit" class="delete-btn" onclick="return confirm('ยืนยันการลบ?')">ลบ</button>
+            </form>
+          </div>
+        {% endfor %}
+
+        <div class="total-section">
+          <p>รวมทั้งสิ้น: <span class="total-price">฿{{ '%.2f'|format(orders|map(attribute='product.price')|sum) }}</span></p>
+          <p style="color: #666; margin-top: 1rem;">จำนวนอย่าง: {{ orders|length }}</p>
+        </div>
+      {% else %}
+        <div class="empty-cart">
+          <p>🛒 ไม่มีสินค้าในตะกร้า</p>
+          <a href="{{ url_for('index') }}" class="btn btn-primary">ไปเลือกสินค้า</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="py-4" style="background: #222; color: #ddd; margin-top: 3rem;">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <h5>MyShop</h5>
+          <p class="small text-muted">ร้านขายของออนไลน์ เลือกซื้อสินค้าได้สะดวก ปลอดภัย และรวดเร็ว</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-1">Contact: support@myshop.example</p>
+          <p class="small text-muted mb-0">&copy; 2026 MyShop. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
